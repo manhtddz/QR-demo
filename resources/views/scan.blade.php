@@ -56,37 +56,77 @@
 <body>
     <h1>契約照会（QRスキャン）</h1>
     <p>QRリーダーで読み取ってください（Enter終端推奨）。</p>
-    {{-- <form id="qrForm" action="/scan-qr" method="post" enctype="multipart/form-data">
-        @csrf
-        <input type="file" name="qr_image" accept="image/*">
-        <button type="submit">Scan</button>
+    {{-- <form id="qrForm" action="/scan-qr" method="post" enctype="multipart/form-data"> --}}
+        {{-- @csrf --}}
+        <input type="text" name="scanner-input" id="scanner-input" autofocus>
+        {{-- <button type="submit">Scan</button> --}}
 
-    </form> --}}
+    {{-- </form> --}}
     <h1>QR Code Scanner</h1>
-    <div id="reader"></div>
+    {{-- <div id="reader"></div> --}}
 
     <div id="formArea"></div>
     <div id="result"></div>
-    {{-- <script>
-        document.getElementById('qrForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
+    <script>
+        let buffer = "";
 
-            const formData = new FormData(this);
+        const input = document.getElementById('scanner-input');
 
-            // Step 1: Upload QR image → get token
-            let res = await fetch('/scan-qr', {
-                method: 'POST',
-                body: formData
-            });
+        input.addEventListener('keydown', e => {
+            if (e.key === "Enter") {
+                e.preventDefault();
 
-            let data = await res.json();
-            if (!data.qr_token) {
-                document.getElementById('result').innerText = data.error;
+                const value = buffer || input.value;
+                input.textContent = value;
+                console.log("HID QR:", value);
+
+                fetch("/scan-qr-by-camera", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Accept": "application/json",
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({
+                        qr: value
+                    }),
+                })
+                .then(res => res.json())
+                .then(data => {
+                    console.log("API response:", data);
+                    if (data.ok) {
+                        alert("Found customer: " + data);
+                    } else {
+                        alert("Error: " + data);
+                    }
+                })
+                .catch(err => console.error("Fetch error:", err));
+
+                // reset để scan tiếp
+                buffer = "";
+                input.value = "";
             }
-        });
-    </script> --}}
+        })
 
-    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+        // document.getElementById('qrForm').addEventListener('submit', async function(e) {
+        //     e.preventDefault();
+
+        //     const formData = new FormData(this);
+
+        //     // Step 1: Upload QR image → get token
+        //     let res = await fetch('/scan-qr', {
+        //         method: 'POST',
+        //         body: formData
+        //     });
+
+        //     let data = await res.json();
+        //     if (!data.qr_token) {
+        //         document.getElementById('result').innerText = data.error;
+        //     }
+        // });
+    </script>
+
+    {{-- <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <script>
         function onScanSuccess(decodedText, decodedResult) {
 
@@ -129,7 +169,7 @@
             },
             false);
         html5QrcodeScanner.render(onScanSuccess, onScanError);
-    </script>
+    </script> --}}
     {{-- <script>
         Html5Qrcode.getCameras()
             .then((devices) => {

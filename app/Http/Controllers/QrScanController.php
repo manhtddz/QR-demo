@@ -49,14 +49,14 @@ class QrScanController extends Controller
         }
 
         // nếu QR là mã đã mã hoá bằng Crypt
-        try {
-            $decrypted = Crypt::decryptString(base64_decode(strtr($qr, '-_', '+/')));
-            $payload = json_decode($decrypted, true);
-            $id = $payload['content'] ?? null;
-        } catch (\Exception $e) {
-            return response()->json(['ok' => false, 'msg' => 'Invalid QR'], 400);
-        }
-
+        // try {
+        //     $decrypted = Crypt::decryptString(base64_decode(strtr($qr, '-_', '+/')));
+        //     $payload = json_decode($decrypted, true);
+        //     $id = $payload['content'] ?? null;
+        // } catch (\Exception $e) {
+        //     return response()->json(['ok' => false, 'msg' => 'Invalid QR'], 400);
+        // }
+        $id = $qr;
         if (!$id) {
             return response()->json(['ok' => false, 'msg' => 'Invalid payload'], 400);
         }
